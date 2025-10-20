@@ -1,0 +1,32 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.header {
+    display: flex;
+    justify-content:end;
+    padding-right: 20px;
+}
+
+.score {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.board {
+    width: 100vw;
+    display: grid;
+    /* grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); */
+    grid-template-columns: repeat(auto-fit, clamp(200px, 20%, 350px));
+    gap: 2rem;
+    justify-content: center;
+}

@@ -1,0 +1,28 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.card-name-container {
+    text-align: center;
+}
+
+.card {
+    border: 1px solid red;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 16rem;
+    min-height: 24rem;
+}
+
+img {
+    object-fit: fill;
+}
+
+.card-text {
+    text-align: center;
+    bottom: 2px;
+    font-size: 2.2rem;
+}
