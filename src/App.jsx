@@ -2,59 +2,70 @@ import { useEffect, useState } from "react";
 import Card from "./Card";
 import "./styles/App.css";
 
+const usedIds = new Set();
+
+function getRandNum() {
+    if (usedIds.size >= 20) {
+        throw new Error("All Digimon IDs used");
+    }
+
+    let id;
+    do {
+        id = Math.floor(Math.random() * 20) + 1;
+    } while (usedIds.has(id));
+
+    usedIds.add(id);
+    return id;
+}
+
 function App() {
-    const [imageUrl, setImageUrl] = useState("");
-    const [digimonName, setDigimonName] = useState("");
-    const [deck, setDeck] = useState([]);
+    const [selectedCards, setSelectedCards] = useState([]);
     const [currentScore, setCurrentScore] = useState(0);
     const [highestScore, setHighestScore] = useState(0);
-
+    const [digimonList, setDigimonList] = useState([]);
 
     useEffect(() => {
-        async function fetchImage() {
-            let key = getRandNum();
-            let url = `https://digi-api.com/api/v1/digimon/${key}`;
-
-            try {
-                const response = await fetch(url);
+        // Async function fetches data for 10 digimon
+        async function fetchAllDigimon() {
+            const promises = Array.from({ length: 10 }, async () => {
+                const id = getRandNum();
+                const response = await fetch(
+                    `https://digi-api.com/api/v1/digimon/${id}`
+                );
                 if (!response.ok) {
                     throw new Error(`Response status: ${response.status}`);
                 }
-                const result = await response.json();
-                console.log(result.images[0].href);
+                const data = await response.json();
 
-                setImageUrl(result.images[0].href);
-                setDigimonName(result.name);
-            } catch (err) {
-                console.error(err.message);
-            }
+                return { name: data.name, img: data.images[0].href };
+            });
+
+            const results = await Promise.all(promises);
+            setDigimonList(results);
         }
 
-        fetchImage();
-    }, []);
-
-    function getRandNum() {
-        return Math.floor(Math.random() * 20) + 1;
-    }
+        fetchAllDigimon();
+    }, [selectedCards]);
 
     // Controls score
     function handleClick(clickedDigimon) {
-        const foundName = deck.find((digimon) => digimon == clickedDigimon)
+        if (!selectedCards) return;
+        const cardSelected = selectedCards.includes(clickedDigimon);
         // Clicked on a duplicate, game over
-        if (foundName) {
-            setDeck([])
-            setCurrentScore(0)
-        }
-        else {
-            setCurrentScore(prevScore => {
+        if (cardSelected) {
+            setSelectedCards([]); //Reset back to empty array
+            setCurrentScore(0);
+        } else {
+            selectedCards.push(clickedDigimon);
+            setCurrentScore((prevScore) => {
                 const newScore = prevScore + 1;
-                
+
                 if (newScore > highestScore) {
-                    setHighestScore(newScore)
+                    setHighestScore(newScore);
                 }
 
-                return newScore
-            })
+                return newScore;
+            });
         }
     }
 
@@ -67,55 +78,17 @@ function App() {
                 </div>
             </div>
             <div className="board">
-                {imageUrl ? (
-                    <Card onClick={handleClick} img={imageUrl} name={digimonName} />
-                ) : (
+                {digimonList.length === 0 ? (
                     <p>Loading...</p>
-                )}
-                {imageUrl ? (
-                    <Card img={imageUrl} name={digimonName} />
                 ) : (
-                    <p>Loading...</p>
-                )}
-                {imageUrl ? (
-                    <Card img={imageUrl} name={digimonName} />
-                ) : (
-                    <p>Loading...</p>
-                )}
-                {imageUrl ? (
-                    <Card img={imageUrl} name={digimonName} />
-                ) : (
-                    <p>Loading...</p>
-                )}
-                {imageUrl ? (
-                    <Card img={imageUrl} name={digimonName} />
-                ) : (
-                    <p>Loading...</p>
-                )}
-                {imageUrl ? (
-                    <Card img={imageUrl} name={digimonName} />
-                ) : (
-                    <p>Loading...</p>
-                )}
-                {imageUrl ? (
-                    <Card img={imageUrl} name={digimonName} />
-                ) : (
-                    <p>Loading...</p>
-                )}
-                {imageUrl ? (
-                    <Card img={imageUrl} name={digimonName} />
-                ) : (
-                    <p>Loading...</p>
-                )}
-                {imageUrl ? (
-                    <Card img={imageUrl} name={digimonName} />
-                ) : (
-                    <p>Loading...</p>
-                )}
-                {imageUrl ? (
-                    <Card img={imageUrl} name={digimonName} />
-                ) : (
-                    <p>Loading...</p>
+                    digimonList.map((digimon, index) => (
+                        <Card
+                            key={index}
+                            img={digimon.img}
+                            name={digimon.name}
+                            onClick={() => handleClick(digimon.name)}
+                        />
+                    ))
                 )}
             </div>
         </div>
