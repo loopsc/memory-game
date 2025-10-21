@@ -2,6 +2,8 @@ import React from "react";
 import "./styles/Card.css";
 
 export default function Card(props) {
+    // const borderColour = props.selectedCards.includes(props.name) ? 'red' : 'green'
+
     return (
         <div onClick={props.onClick} className="card">
             <img src={props.img}></img>

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import Card from "./Card";
 import "./styles/App.css";
 
+// todo: Ensure there is always at least 1 card that has not been selected
+
 const usedIds = new Set();
 
 function getRandNum() {
@@ -19,7 +21,7 @@ function getRandNum() {
 }
 
 function App() {
-    const [selectedCards, setSelectedCards] = useState([]);
+    const [selectedCards, setSelectedCards] = useState([]); //Array of digimon names that have been selected previously
     const [currentScore, setCurrentScore] = useState(0);
     const [highestScore, setHighestScore] = useState(0);
     const [digimonList, setDigimonList] = useState([]);
@@ -41,22 +43,41 @@ function App() {
             });
 
             const results = await Promise.all(promises);
-            setDigimonList(results);
+            console.log(`New batch of 10: ${results[0].name}`);
+
+            // There includes at least one card that has not been selected
+
+            if (!results.every((data) => selectedCards.includes(data.name))) {
+                setDigimonList(results);
+            } else {
+                await fetchAllDigimon();
+            }
         }
 
         fetchAllDigimon();
     }, [selectedCards]);
 
-    // Controls score
+    // When a card is clicked
     function handleClick(clickedDigimon) {
-        if (!selectedCards) return;
-        const cardSelected = selectedCards.includes(clickedDigimon);
+        usedIds.clear();
+
+        const isCardDuplicate = selectedCards.includes(clickedDigimon);
         // Clicked on a duplicate, game over
-        if (cardSelected) {
+        if (isCardDuplicate) {
             setSelectedCards([]); //Reset back to empty array
             setCurrentScore(0);
         } else {
-            selectedCards.push(clickedDigimon);
+            //Correct guess
+            // setSelectedCards((prev) => [...prev, clickedDigimon]);
+            setSelectedCards((prev) => {
+                const newSelectedCards = [...prev, clickedDigimon];
+
+                if (newSelectedCards.length === 20) {
+                    alert("You got them all!");
+                }
+
+                return newSelectedCards;
+            });
             setCurrentScore((prevScore) => {
                 const newScore = prevScore + 1;
 
@@ -67,23 +88,26 @@ function App() {
                 return newScore;
             });
         }
+
+        console.log(usedIds);
     }
 
     return (
         <div className="main">
             <div className="header">
                 <div className="score">
-                    <p>Current Score: {currentScore}</p>
-                    <p>Highest Score: {highestScore}</p>
+                    <p className="score-text">Current Score: {currentScore}</p>
+                    <p className="score-text">Highest Score: {highestScore}</p>
                 </div>
             </div>
             <div className="board">
                 {digimonList.length === 0 ? (
                     <p>Loading...</p>
                 ) : (
-                    digimonList.map((digimon, index) => (
+                    digimonList.map((digimon) => (
                         <Card
-                            key={index}
+                            // selectedCards={selectedCards}
+                            key={digimon.name}
                             img={digimon.img}
                             name={digimon.name}
                             onClick={() => handleClick(digimon.name)}

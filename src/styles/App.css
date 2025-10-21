@@ -22,6 +22,11 @@
     gap: 3px;
 }
 
+.score-text {
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
 .board {
     width: 100vw;
     display: grid;
